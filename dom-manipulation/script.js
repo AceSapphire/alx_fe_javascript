@@ -17,8 +17,8 @@ function showRandomQuote() {
 // Show quote when button clicked
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 
-// Function to add new quote
-function addQuote() {
+// Function to add new quote (renamed!)
+function createAddQuoteForm() {
   const newText = document.getElementById('newQuoteText').value.trim();
   const newCategory = document.getElementById('newQuoteCategory').value.trim();
 
@@ -32,3 +32,4 @@ function addQuote() {
     alert('Please enter both a quote and category.');
   }
 }
+
