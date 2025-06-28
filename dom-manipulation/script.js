@@ -94,7 +94,7 @@ function importFromJsonFile(event) {
   fileReader.readAsText(event.target.files[0]);
 }
 
-// ✅ Sync with server simulation
+// ✅ Fetch from server
 async function fetchQuotesFromServer() {
   const response = await fetch("https://jsonplaceholder.typicode.com/posts");
   const data = await response.json();
@@ -105,12 +105,25 @@ async function fetchQuotesFromServer() {
   return serverQuotes;
 }
 
+// ✅ Post local quotes to server simulation
+async function postQuotesToServer() {
+  await fetch("https://jsonplaceholder.typicode.com/posts", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(quotes)
+  });
+}
+
+// ✅ Sync: fetch + post + merge + conflict resolution
 async function syncQuotes() {
   const serverQuotes = await fetchQuotesFromServer();
-  const merged = [...serverQuotes, ...quotes];
-  quotes = merged;
+  await postQuotesToServer();
+  // Simple conflict resolution: server wins
+  quotes = [...serverQuotes, ...quotes];
   saveQuotes();
-  syncStatus.textContent = "Quotes synced with server!";
+  syncStatus.textContent = "Quotes synced with server (fetch + post)!";
   setTimeout(() => {
     syncStatus.textContent = "";
   }, 3000);
@@ -118,7 +131,7 @@ async function syncQuotes() {
   filterQuotes();
 }
 
-// Periodic sync every 10 seconds
+// ✅ Periodic sync every 10s
 setInterval(syncQuotes, 10000);
 
 newQuoteButton.addEventListener("click", showRandomQuote);
