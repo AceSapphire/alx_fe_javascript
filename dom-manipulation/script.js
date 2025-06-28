@@ -40,7 +40,6 @@ function populateCategories() {
     filter.appendChild(option);
   });
 
-  // Restore last selected filter
   const lastFilter = localStorage.getItem('selectedCategory');
   if (lastFilter) {
     filter.value = lastFilter;
@@ -68,7 +67,6 @@ function showRandomQuote() {
   quoteDisplay.appendChild(quoteText);
   quoteDisplay.appendChild(quoteCategory);
 
-  // Save last shown quote in sessionStorage (optional)
   sessionStorage.setItem('lastQuote', JSON.stringify(randomQuote));
 }
 
@@ -117,10 +115,9 @@ function createAddQuoteForm() {
   if (newText && newCategory) {
     quotes.push({ text: newText, category: newCategory });
     saveQuotes();
-    populateCategories(); // Update dropdown if new category
+    populateCategories();
     alert('New quote added!');
 
-    // Clear inputs
     document.getElementById('newQuoteText').value = '';
     document.getElementById('newQuoteCategory').value = '';
   } else {
@@ -161,10 +158,43 @@ function importFromJsonFile(event) {
 }
 
 // ===============================
+// Sync with Mock Server
+// ===============================
+
+async function syncWithServer() {
+  const syncStatus = document.getElementById('syncStatus');
+
+  try {
+    // Fetch quotes from JSONPlaceholder
+    const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+    const serverQuotes = await response.json();
+
+    // Simulate: map posts to quote-like objects
+    const fetchedQuotes = serverQuotes.slice(0, 5).map(post => ({
+      text: post.title,
+      category: 'Server'
+    }));
+
+    // Replace local quotes with server quotes (server wins)
+    quotes = fetchedQuotes;
+    saveQuotes();
+    populateCategories();
+    filterQuotes();
+
+    syncStatus.textContent = '✅ Synced with server. Local data replaced.';
+  } catch (error) {
+    syncStatus.textContent = '❌ Failed to sync with server.';
+    console.error('Sync error:', error);
+  }
+}
+
+// Periodically sync every 30 seconds
+setInterval(syncWithServer, 30000);
+
+// ===============================
 // Initialize
 // ===============================
 
 document.getElementById('newQuote').addEventListener('click', showRandomQuote);
 
-// Populate filter when page loads
 populateCategories();
